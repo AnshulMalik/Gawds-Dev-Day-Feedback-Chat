@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Developer's Day Feedback</title>
+    </head>
+    <body>
+
+        <ul id="messages"></ul>
+        <form id="landing-form">
+            <input id="name" placeholder="Your nickname" autocomplete="off" /><button>Go</button>
+        </form>
+        <script>
+            if(localStorage.getItem("ddnname")) {
+                window.location.pathname = "/chatroom";
+            }
+            else {
+                document.getElementById('landing-form').addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    var nname = document.getElementById('name').value;
+                    if(nname) {
+                        localStorage.setItem('ddnname', nname);
+                        localStorage.setItem('ddkey', Math.random().toString(36).slice(2));
+                    }
+                    window.location.pathname = '/chatroom';
+                    console.log(nname);
+                });
+            }
+        </script>
+    </body>
+</html>

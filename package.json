@@ -1,0 +1,10 @@
+{
+  "name": "Realtime feedback app",
+  "version": "0.0.1",
+  "description": "Feedback page dday",
+  "dependencies": {
+    "express": "^4.14.0",
+    "mongo": "^0.1.0",
+    "socket.io": "^1.4.8"
+  }
+}

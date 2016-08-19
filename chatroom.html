@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Developer's Day Feedback </title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font: 13px Helvetica, Arial; width: 600px; margin: 0 auto;}
+            form { background: transparent; padding: 3px; position: fixed; bottom: 10px;}
+            form input { border: 0; padding: 10px; width: 550px; background-color: #c19a76; color: antiquewhite;}
+            form button { border: none; padding: 10px; background-color: #b18d6c; color: antiquewhite;}
+            ul#messages { margin-bottom: 50px; }
+            #messages { list-style-type: none; margin: 0; padding: 0; }
+            #messages li { margin: 10px; padding: 15px 10px; overflow-wrap: break-word; }
+            #messages li.self { background: #eee; }
+            .details { float: right; padding: 0 5px; }
+            .left { float: left; padding: 0 5px; max-width: 100px; min-width: 100px;}
+            .self { background-color: #eee; width: 400px; float: right; border-radius: 5px 30px 0 5px;}
+            .other { background-color: #2a7284; width: 400px; color: white; border-radius: 0px 5px 5px 30px; clear: both;}
+            #messages li:last-child { margin-bottom: 60px;}
+        </style>
+    </head>
+    <body>
+
+        <ul id="messages"></ul>
+        <form action="">
+            <input id="m" autocomplete="off" /><button>Send</button>
+        </form>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/timeago.js"></script>
+        <script>
+            if(!localStorage.getItem("ddnname")) {
+                window.location.pathname = "/";
+            }
+
+            setInterval(function() {
+                $('time.timeago').timeago();
+            }, 1000);
+
+            var socket = io();
+
+            // fetch latest messages one time
+            $(document).ready(function() {
+                $.get('/recent', function(data, err) {
+                    if(data) {
+                        for(var i in data) {
+                            appendMessage(data[data.length-i-1]);
+                        }
+                    }
+                })
+            });
+
+
+            $('form').submit(function(){
+                var msg = $($.parseHTML($('#m').val())).text();
+                if(msg) {
+                    var data = {fromId: localStorage.getItem('ddkey'), name: localStorage.getItem('ddnname'), message: msg, createdAt: new Date().toISOString()};
+                    appendMessage(data);
+                    socket.emit('message', data);
+                    $('#m').val('');
+                }
+                return false;
+            });
+
+            socket.on('message', function(msg) {
+                    appendMessage(msg);
+            });
+
+            function appendMessage(message) {
+                if(message.fromId == localStorage.getItem('ddkey')) {
+                    // Message sent by me
+                    $("#messages").append("<li class='self'><span class='left'>"+message.name+": </span>" + message.message +" <span class='details'><time class='timeago' datetime='"+message.createdAt+"'>just now</time></span></li>");
+                }
+                else {
+                    $("#messages").append("<li class='other'><span class='left'>"+message.name+": </span>" + message.message +" <span class='details'><time class='timeago' datetime='"+message.createdAt+"'>just now</time></span></li>");
+                }
+
+                scrollToEnd();
+            }
+
+            function scrollToEnd() {
+                $("html, body").animate({ scrollTop: $(document).height() }, 100);
+            }
+        </script>
+    </body>
+</html>
